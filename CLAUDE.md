@@ -107,3 +107,56 @@ self to know before re-reading the rest of this file.)*
   RLS (a superuser connection bypasses it entirely and every test "passes"
   regardless of policy). See the session's scratchpad epg/h.mjs if it
   still exists.
+
+- 2026-09-29: Docker installed, Phase 0 actually run and shown (all three
+  seed users logged in through the real local stack, including through a
+  shared devtunnel once — needed two fixes: `[auth.email].enable_signup`
+  in config.toml gates the *whole* email/password provider, not just
+  self-signup, and `next.config.ts` needs `experimental.serverActions.
+  allowedOrigins` including `localhost:3000` because a devtunnel's local
+  forwarding agent rewrites `Origin` to the local target before Next
+  sees it). Repo pushed to GitHub (mahalakongasawamo-star/herbal-pos-cloud,
+  public). User said "continue next phase" — took as go-ahead — so Phase 1
+  (SPEC §1's MVP-parity bar: all 7 real screens) is now built and
+  integrated. Added one schema migration along the way
+  (20260929100000_settings.sql — a singleton `settings` table; SPEC.md §3
+  never listed one, and Options/receipt printing need it. Shown to the
+  user, applied same-session per CLAUDE.md's rule on schema changes).
+  Two legacy panels dropped on purpose, not ported: Options' "Cashiers"
+  (replaced by a read-only Staff list — the cashier is the signed-in user
+  now, SPEC §9, and creating an account needs the service-role key the
+  browser never has) and "Data backup" (nothing analogous once Postgres
+  is the source of truth; SPEC §1 already assigns backup verification to
+  Phase 2). Built POS + the receipt/print system myself (highest risk —
+  money and stock deduction); dispatched the other 6 screens
+  (Inventory/Add Stock/Product master/Options+Setup guide/Sales log/
+  Reports) as parallel Agent-tool calls against a shared contract
+  (lib/types.ts, lib/mappers.ts, lib/rpc/*, lib/data/*,
+  components/providers/catalog-provider.tsx, lib/hooks/use-live-stock.ts,
+  components/receipt/print-provider.tsx) — all 6 came back clean on
+  their own, and the only integration conflict was one shared file
+  (app/(app)/layout.tsx) that needed CatalogProvider moved to wrap
+  AppShell itself, not just {children}, since AppShell's own Setup-guide
+  Drawer needs catalog data too.
+  Found one real bug only once real queries ran (tsc/build stayed silent
+  about it): `lib/data/catalog.ts`'s products→package_inclusions embed
+  needed its OWN fkey hint — package_inclusions has two FKs to products
+  (package_product_id, component_product_id), so PostgREST can't infer
+  either side of that embed without one.
+  **Verified, all against the real local stack, not assumed:** tsc/lint/
+  build all clean repo-wide; all 7 routes render with no server crash for
+  all three roles with correct access gating; a 15-point functional pass
+  exercising the exact query/RPC path each screen uses (price edit,
+  receive stock, commit a sale, sales list + receipt detail, the Reports
+  query, a full receive→sell→void stock-balance cycle, add a member
+  tier, update settings, the staff list, RLS blocking a manager's price
+  edit) — all pass.
+  **Not yet done:** no real browser was available this session
+  (Playwright's Chromium download timed out on this network) — every
+  check above is server-rendered HTML + direct Supabase queries, not an
+  actual hydrated browser session. Client-side-only concerns (focus
+  management, keyboard shortcuts, the realtime subscriptions actually
+  firing UI updates on a second tab, print/download dialogs) have NOT
+  been exercised end-to-end and are worth the user's own look before
+  calling Phase 1 truly done. `types/database.ts` is regenerated
+  (`npm run db:types`) — do that again after any future migration.
