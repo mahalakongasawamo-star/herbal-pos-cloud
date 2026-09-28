@@ -30,17 +30,21 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           receipt viewer modal both have it, without every screen that might
           open one importing it itself. */}
       <style>{RECEIPT_CSS + PRINT_PAGE_CSS}</style>
-      <AppShell
-        role={profile.role}
-        fullName={profile.full_name}
-        scopeLabel={branchScopeLabel(profile)}
-        allBranches={profile.branch_id === null}
-        // lowStockCount: wired up by CatalogProvider-backed pages below.
-      >
-        <CatalogProvider>
+      {/* Wraps AppShell itself (not just {children}): AppShell's own Setup
+          guide Drawer renders a SetupGuide that reads useCatalog(), so the
+          provider has to be an ancestor of AppShell, not just of the routed
+          page content. */}
+      <CatalogProvider>
+        <AppShell
+          role={profile.role}
+          fullName={profile.full_name}
+          scopeLabel={branchScopeLabel(profile)}
+          allBranches={profile.branch_id === null}
+          // lowStockCount: wired up by CatalogProvider-backed pages below.
+        >
           <PrintProvider>{children}</PrintProvider>
-        </CatalogProvider>
-      </AppShell>
+        </AppShell>
+      </CatalogProvider>
     </>
   );
 }

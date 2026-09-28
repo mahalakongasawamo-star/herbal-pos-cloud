@@ -19,6 +19,7 @@ import { usePathname } from 'next/navigation';
 import { BookOpen } from 'lucide-react';
 import { Button, Drawer, Pill, cx } from '@/components/ui';
 import { APP_NAME, NAV, ROLE_LABEL, navFor, navForPath, type NavItem, type Role } from '@/lib/nav';
+import { SetupGuide } from '@/components/options/setup-guide';
 import { BrandMark } from './BrandMark';
 import { SignOutButton } from './SignOutButton';
 
@@ -107,7 +108,7 @@ export function AppShell({ role, fullName, scopeLabel, allBranches, lowStockCoun
         </div>
       </div>
       <Drawer open={guideOpen} onClose={() => setGuideOpen(false)} title="Setup guide">
-        <p className="text-[15px] leading-relaxed text-ink-2">The setup guide is ported in Phase 1.</p>
+        <SetupGuide />
       </Drawer>
     </>
   );
