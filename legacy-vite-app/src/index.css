@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Colour tokens as RGB channels so Tailwind can apply opacity (bg-leaf/30).
+   Light: cool green-grey canvas, malunggay-leaf structure, turmeric actions. */
+:root {
+  --canvas: 236 240 235;
+  --surface: 255 255 255;
+  --sunken: 243 246 242;
+  --ink: 20 30 23;
+  --ink-2: 60 74 64;
+  --muted: 98 112 102;
+  --line: 214 222 213;
+  --line-strong: 184 196 185;
+  --leaf: 26 77 50;
+  --leaf-2: 34 99 64;
+  --leaf-ink: 240 247 241;
+  --leaf-soft: 224 237 227;
+  --turmeric: 232 168 26;
+  --turmeric-2: 219 154 10;
+  --turmeric-ink: 38 26 0;
+  --turmeric-soft: 251 239 206;
+  --ok: 22 122 62;
+  --ok-soft: 222 242 229;
+  --warn: 184 84 0;
+  --warn-soft: 253 236 216;
+  --bad: 190 36 36;
+  --bad-soft: 252 228 228;
+  --display: 17 43 29;
+  --display-ink: 255 205 82;
+  --display-dim: 154 186 166;
+  --rail: 18 52 34;
+  --rail-ink: 222 236 226;
+  --rail-muted: 160 190 172;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: 12 18 14;
+    --surface: 21 29 24;
+    --sunken: 16 23 19;
+    --ink: 232 239 233;
+    --ink-2: 192 205 196;
+    --muted: 142 158 147;
+    --line: 40 52 44;
+    --line-strong: 62 78 67;
+    --leaf: 58 140 95;
+    --leaf-2: 70 158 110;
+    --leaf-ink: 244 251 246;
+    --leaf-soft: 26 48 35;
+    --turmeric: 240 180 45;
+    --turmeric-2: 250 196 72;
+    --turmeric-ink: 30 20 0;
+    --turmeric-soft: 54 42 14;
+    --ok: 96 198 134;
+    --ok-soft: 20 48 31;
+    --warn: 245 154 66;
+    --warn-soft: 58 37 16;
+    --bad: 242 110 110;
+    --bad-soft: 62 24 24;
+    --display: 8 24 16;
+    --display-ink: 255 205 82;
+    --display-dim: 126 158 138;
+    --rail: 10 20 14;
+    --rail-ink: 214 230 219;
+    --rail-muted: 136 162 146;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --canvas: 12 18 14;
+  --surface: 21 29 24;
+  --sunken: 16 23 19;
+  --ink: 232 239 233;
+  --ink-2: 192 205 196;
+  --muted: 142 158 147;
+  --line: 40 52 44;
+  --line-strong: 62 78 67;
+  --leaf: 58 140 95;
+  --leaf-2: 70 158 110;
+  --leaf-ink: 244 251 246;
+  --leaf-soft: 26 48 35;
+  --turmeric: 240 180 45;
+  --turmeric-2: 250 196 72;
+  --turmeric-ink: 30 20 0;
+  --turmeric-soft: 54 42 14;
+  --ok: 96 198 134;
+  --ok-soft: 20 48 31;
+  --warn: 245 154 66;
+  --warn-soft: 58 37 16;
+  --bad: 242 110 110;
+  --bad-soft: 62 24 24;
+  --display: 8 24 16;
+  --display-ink: 255 205 82;
+  --display-dim: 126 158 138;
+  --rail: 10 20 14;
+  --rail-ink: 214 230 219;
+  --rail-muted: 136 162 146;
+  color-scheme: dark;
+}
+
+/* Safe areas: phones draw the page under translucent system bars. */
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+  height: 100%;
+}
+body {
+  height: 100%;
+  margin: 0;
+  background: rgb(var(--canvas));
+  color: rgb(var(--ink));
+  font-family: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible Next Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+#root {
+  height: 100%;
+}
+#print-root {
+  display: none;
+}
+
+@layer utilities {
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  .pb-safe {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* The total panel reads like a counter pole display. */
+.pole-figure {
+  text-shadow: 0 0 22px rgb(var(--display-ink) / 0.28);
+}
+/* Torn-receipt edge between the order lines and the totals. */
+.receipt-edge {
+  position: relative;
+}
+
+.toast-region {
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+.toast-in {
+  animation: toast-in 180ms ease-out;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.drawer-panel {
+  animation: drawer-in 200ms ease-out;
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0.4;
+  }
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

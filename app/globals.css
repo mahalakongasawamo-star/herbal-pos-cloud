@@ -1,0 +1,372 @@
+/*
+  Herbal POS design system: a 1:1 port of legacy-vite-app/src/index.css and
+  legacy-vite-app/tailwind.config.cjs from Tailwind 3.4 to Tailwind 4.
+
+  The look must not change (SPEC.md §10). Token channel values are copied
+  byte-for-byte from the legacy file. Everything else in this file exists to
+  make v4 render legacy class strings exactly as v3 did; each block says which
+  v3 behaviour it restores. docs/tailwind-v4-port.md is the class-by-class
+  checklist Phase 1 ports follow.
+*/
+
+@import 'tailwindcss';
+
+/* The reference copy of the Vite app is read-only and not part of this build:
+   keep its class strings out of the generated CSS. The porting docs quote v3
+   class names on purpose, so they are excluded too. */
+@source not '../legacy-vite-app';
+@source not '../docs';
+
+/* v3 `hover:` was a plain :hover. v4 wraps it in @media (hover: hover), so a
+   tap on a touch till no longer shows the hover state. Keep the v3 behaviour
+   so tablets look the same as before (group-hover: follows this too). */
+@custom-variant hover (&:hover);
+
+/* ------------------------------------------------------------------ Theme */
+
+/* The 28 legacy tokens as Tailwind colours. `inline` makes each utility read
+   the live channel variable, so bg-leaf, text-ink-2, border-line, bg-leaf/30,
+   ring-turmeric ... all follow the light/dark blocks below. (v3 wrote these as
+   rgb(var(--x) / <alpha-value>); v4 applies the /NN modifier with color-mix,
+   which yields the same colour at the same alpha.) */
+@theme inline {
+  --color-canvas: rgb(var(--canvas));
+  --color-surface: rgb(var(--surface));
+  --color-sunken: rgb(var(--sunken));
+  --color-ink: rgb(var(--ink));
+  --color-ink-2: rgb(var(--ink-2));
+  --color-muted: rgb(var(--muted));
+  --color-line: rgb(var(--line));
+  --color-line-strong: rgb(var(--line-strong));
+  --color-leaf: rgb(var(--leaf));
+  --color-leaf-2: rgb(var(--leaf-2));
+  --color-leaf-ink: rgb(var(--leaf-ink));
+  --color-leaf-soft: rgb(var(--leaf-soft));
+  --color-turmeric: rgb(var(--turmeric));
+  --color-turmeric-2: rgb(var(--turmeric-2));
+  --color-turmeric-ink: rgb(var(--turmeric-ink));
+  --color-turmeric-soft: rgb(var(--turmeric-soft));
+  --color-ok: rgb(var(--ok));
+  --color-ok-soft: rgb(var(--ok-soft));
+  --color-warn: rgb(var(--warn));
+  --color-warn-soft: rgb(var(--warn-soft));
+  --color-bad: rgb(var(--bad));
+  --color-bad-soft: rgb(var(--bad-soft));
+  --color-display: rgb(var(--display));
+  --color-display-ink: rgb(var(--display-ink));
+  --color-display-dim: rgb(var(--display-dim));
+  --color-rail: rgb(var(--rail));
+  --color-rail-ink: rgb(var(--rail-ink));
+  --color-rail-muted: rgb(var(--rail-muted));
+}
+
+@theme {
+  /* fontFamily.sans / fontFamily.mono from tailwind.config.cjs, same order. */
+  --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible Next Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", "Atkinson Hyperlegible Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* fontSize.xl override from tailwind.config.cjs. */
+  --text-xl: 1.3125rem;
+  --text-xl--line-height: 1.75rem;
+
+  /* v3's default font sizes paired each size with a line-height in rem; v4
+     uses unitless ratios. Same computed value on the element itself, but a
+     unitless value is inherited as a ratio, so children that change only the
+     font size get a different line box. Example: the page title
+     `text-2xl sm:text-[28px]` is 32px tall in v3 and 37.3px with v4's ratio.
+     These are v3's values, restored. */
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+
+  /* v3 screens were px (min-width: 640px); v4's are rem. Identical at the
+     default 16px browser font size, but they drift when a cashier has raised
+     the browser's font size. Keep v3's px so layouts switch at the same widths. */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ------------------------------------------ v3 preflight compatibility
+   v4's preflight differs from v3's in a few places the legacy markup leans
+   on. Each rule below restores one v3 default and says who relies on it.
+   It sits in the base layer, so any utility on the element still wins,
+   as it did in v3. (`revert` = "what the browser does", which is what v3
+   left in place for those properties.) */
+@layer base {
+  /* v3 gave every element border-color: gray-200 (#e5e7eb); v4 uses
+     currentColor. Every border in the legacy markup names a token (checked
+     for all border/divide utilities), so today this is a safety net: a
+     ported or new `border` without a colour still looks like v3. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: #e5e7eb;
+  }
+
+  /* v3 placeholders were gray-400 (#9ca3af); v4 uses 50% of the text colour.
+     Relied on by the one input that sets a placeholder without a
+     placeholder: utility (the Add stock bulk-grid quantity cells, "0"). */
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af;
+  }
+
+  /* v3 made buttons show the pointer and anything :disabled the arrow; v4
+     leaves buttons on the browser's arrow. Every legacy <button> relies on it
+     (only <summary> sets cursor-pointer itself). */
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+  :disabled {
+    cursor: default;
+  }
+
+  /* v3 turned search inputs into plain text fields; v4 dropped the reset.
+     Without it Safari draws its own rounded search field. Relied on by the
+     POS, Sales log, Inventory and Product master search boxes. */
+  [type='search'] {
+    -webkit-appearance: textfield;
+    outline-offset: -2px;
+  }
+
+  /* v4 forces opacity: 1 on form controls; v3 left the browser's value.
+     Safari dims disabled fields, which the legacy markup relies on wherever
+     it disables a field with no disabled:opacity-* utility: the POS cashier,
+     customer, search and quantity inputs once a sale is saved, and the Add
+     stock name/category fields for a known SKU. */
+  button,
+  input,
+  select,
+  optgroup,
+  textarea {
+    opacity: revert;
+  }
+
+  /* v4 retunes WebKit's date/time field internals and the datalist/calendar
+     marker; v3 left them to the browser. Relied on by the date inputs in Add
+     stock and the Sales log, and the datalist-backed customer, leader, upline
+     and SKU inputs. */
+  ::-webkit-date-and-time-value {
+    min-height: revert;
+    text-align: revert;
+  }
+  ::-webkit-datetime-edit {
+    display: revert;
+  }
+  ::-webkit-datetime-edit-fields-wrapper {
+    padding: revert;
+  }
+  ::-webkit-datetime-edit,
+  ::-webkit-datetime-edit-year-field,
+  ::-webkit-datetime-edit-month-field,
+  ::-webkit-datetime-edit-day-field,
+  ::-webkit-datetime-edit-hour-field,
+  ::-webkit-datetime-edit-minute-field,
+  ::-webkit-datetime-edit-second-field,
+  ::-webkit-datetime-edit-millisecond-field,
+  ::-webkit-datetime-edit-meridiem-field {
+    padding-block: revert;
+  }
+  ::-webkit-calendar-picker-indicator {
+    line-height: revert;
+  }
+}
+
+/* --------------------------------------------------------------- Tokens */
+
+/* Colour tokens as RGB channels so Tailwind can apply opacity (bg-leaf/30).
+   Light: cool green-grey canvas, malunggay-leaf structure, turmeric actions. */
+:root {
+  --canvas: 236 240 235;
+  --surface: 255 255 255;
+  --sunken: 243 246 242;
+  --ink: 20 30 23;
+  --ink-2: 60 74 64;
+  --muted: 98 112 102;
+  --line: 214 222 213;
+  --line-strong: 184 196 185;
+  --leaf: 26 77 50;
+  --leaf-2: 34 99 64;
+  --leaf-ink: 240 247 241;
+  --leaf-soft: 224 237 227;
+  --turmeric: 232 168 26;
+  --turmeric-2: 219 154 10;
+  --turmeric-ink: 38 26 0;
+  --turmeric-soft: 251 239 206;
+  --ok: 22 122 62;
+  --ok-soft: 222 242 229;
+  --warn: 184 84 0;
+  --warn-soft: 253 236 216;
+  --bad: 190 36 36;
+  --bad-soft: 252 228 228;
+  --display: 17 43 29;
+  --display-ink: 255 205 82;
+  --display-dim: 154 186 166;
+  --rail: 18 52 34;
+  --rail-ink: 222 236 226;
+  --rail-muted: 160 190 172;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: 12 18 14;
+    --surface: 21 29 24;
+    --sunken: 16 23 19;
+    --ink: 232 239 233;
+    --ink-2: 192 205 196;
+    --muted: 142 158 147;
+    --line: 40 52 44;
+    --line-strong: 62 78 67;
+    --leaf: 58 140 95;
+    --leaf-2: 70 158 110;
+    --leaf-ink: 244 251 246;
+    --leaf-soft: 26 48 35;
+    --turmeric: 240 180 45;
+    --turmeric-2: 250 196 72;
+    --turmeric-ink: 30 20 0;
+    --turmeric-soft: 54 42 14;
+    --ok: 96 198 134;
+    --ok-soft: 20 48 31;
+    --warn: 245 154 66;
+    --warn-soft: 58 37 16;
+    --bad: 242 110 110;
+    --bad-soft: 62 24 24;
+    --display: 8 24 16;
+    --display-ink: 255 205 82;
+    --display-dim: 126 158 138;
+    --rail: 10 20 14;
+    --rail-ink: 214 230 219;
+    --rail-muted: 136 162 146;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --canvas: 12 18 14;
+  --surface: 21 29 24;
+  --sunken: 16 23 19;
+  --ink: 232 239 233;
+  --ink-2: 192 205 196;
+  --muted: 142 158 147;
+  --line: 40 52 44;
+  --line-strong: 62 78 67;
+  --leaf: 58 140 95;
+  --leaf-2: 70 158 110;
+  --leaf-ink: 244 251 246;
+  --leaf-soft: 26 48 35;
+  --turmeric: 240 180 45;
+  --turmeric-2: 250 196 72;
+  --turmeric-ink: 30 20 0;
+  --turmeric-soft: 54 42 14;
+  --ok: 96 198 134;
+  --ok-soft: 20 48 31;
+  --warn: 245 154 66;
+  --warn-soft: 58 37 16;
+  --bad: 242 110 110;
+  --bad-soft: 62 24 24;
+  --display: 8 24 16;
+  --display-ink: 255 205 82;
+  --display-dim: 126 158 138;
+  --rail: 10 20 14;
+  --rail-ink: 214 230 219;
+  --rail-muted: 136 162 146;
+  color-scheme: dark;
+}
+
+/* ------------------------------------------------------------ Page shell
+   Unlayered on purpose: in v3 these rules came after the utilities in the
+   same unlayered sheet, so they won ties. Unlayered CSS beats every v4 layer,
+   which keeps that outcome for the classes the legacy markup pairs them with. */
+
+/* Safe areas: phones draw the page under translucent system bars. */
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+  height: 100%;
+}
+body {
+  height: 100%;
+  margin: 0;
+  background: rgb(var(--canvas));
+  color: rgb(var(--ink));
+  font-family: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible Next Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+/* The app wrapper. app/layout.tsx renders <div id="root"> inside <body>, as
+   the Vite index.html did, so h-full screens fill the viewport and portals
+   (modals, toasts, #print-root) still land directly on <body>. */
+#root {
+  height: 100%;
+}
+#print-root {
+  display: none;
+}
+
+/* v3 `@layer utilities` classes become v4 utilities (variants work on them). */
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+@utility pb-safe {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* The total panel reads like a counter pole display. */
+.pole-figure {
+  text-shadow: 0 0 22px rgb(var(--display-ink) / 0.28);
+}
+/* Torn-receipt edge between the order lines and the totals. */
+.receipt-edge {
+  position: relative;
+}
+
+.toast-region {
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+.toast-in {
+  animation: toast-in 180ms ease-out;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.drawer-panel {
+  animation: drawer-in 200ms ease-out;
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0.4;
+  }
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
