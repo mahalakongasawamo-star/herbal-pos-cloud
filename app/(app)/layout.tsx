@@ -10,6 +10,8 @@ import type { ReactNode } from 'react';
 import { AppShell } from '@/components/shell/AppShell';
 import { NoAccessCard, UnavailableCard } from '@/components/shell/StatusCards';
 import { CatalogProvider } from '@/components/providers/catalog-provider';
+import { PrintProvider } from '@/components/receipt/print-provider';
+import { PRINT_PAGE_CSS, RECEIPT_CSS } from '@/components/receipt/receipt';
 import { branchScopeLabel, requireProfile } from '@/lib/auth';
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -23,14 +25,22 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   const { profile } = session;
   return (
-    <AppShell
-      role={profile.role}
-      fullName={profile.full_name}
-      scopeLabel={branchScopeLabel(profile)}
-      allBranches={profile.branch_id === null}
-      // lowStockCount: wired up by CatalogProvider-backed pages below.
-    >
-      <CatalogProvider>{children}</CatalogProvider>
-    </AppShell>
+    <>
+      {/* Global so the hidden #print-root portal (any route) and the
+          receipt viewer modal both have it, without every screen that might
+          open one importing it itself. */}
+      <style>{RECEIPT_CSS + PRINT_PAGE_CSS}</style>
+      <AppShell
+        role={profile.role}
+        fullName={profile.full_name}
+        scopeLabel={branchScopeLabel(profile)}
+        allBranches={profile.branch_id === null}
+        // lowStockCount: wired up by CatalogProvider-backed pages below.
+      >
+        <CatalogProvider>
+          <PrintProvider>{children}</PrintProvider>
+        </CatalogProvider>
+      </AppShell>
+    </>
   );
 }

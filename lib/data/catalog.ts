@@ -40,7 +40,7 @@ export async function fetchCatalog(supabase: SupabaseClient): Promise<Catalog> {
       .select(
         `id, sku, name, category_id, is_package, price, member_price, tier_prices, reorder_level, active,
          category:categories(name),
-         package_inclusions(qty, component:products!package_inclusions_component_product_id_fkey(id, sku, name))`,
+         package_inclusions!package_inclusions_package_product_id_fkey(qty, component:products!package_inclusions_component_product_id_fkey(id, sku, name))`,
       )
       .order('name'),
     supabase.from('member_tiers').select('*').order('sort_order'),
