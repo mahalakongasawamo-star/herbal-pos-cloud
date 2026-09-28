@@ -9,6 +9,7 @@
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/shell/AppShell';
 import { NoAccessCard, UnavailableCard } from '@/components/shell/StatusCards';
+import { CatalogProvider } from '@/components/providers/catalog-provider';
 import { branchScopeLabel, requireProfile } from '@/lib/auth';
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -27,9 +28,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       fullName={profile.full_name}
       scopeLabel={branchScopeLabel(profile)}
       allBranches={profile.branch_id === null}
-      // lowStockCount: wired up in Phase 1 (Inventory badge).
+      // lowStockCount: wired up by CatalogProvider-backed pages below.
     >
-      {children}
+      <CatalogProvider>{children}</CatalogProvider>
     </AppShell>
   );
 }

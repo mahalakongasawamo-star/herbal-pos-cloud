@@ -3,12 +3,11 @@
 //
 // Every query runs as the signed-in user (anon key + their JWT from the
 // cookies), so RLS applies. The service-role key is deliberately not used here.
-//
-// Untyped for now: generated Database types arrive with the migrations.
 
 import 'server-only';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import type { Database } from '@/types/database';
 
 /**
  * Supabase responses are per user. Opt every request out of Next's data cache
@@ -26,7 +25,7 @@ export async function createClient() {
 
   const cookieStore = await cookies();
 
-  return createServerClient(url, key, {
+  return createServerClient<Database>(url, key, {
     global: { fetch: noStoreFetch },
     cookies: {
       getAll() {
